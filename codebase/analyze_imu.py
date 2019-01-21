@@ -4,12 +4,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal
 
-#x = []
 x = []
 y = []
 z = []
+roll = []
+pitch = []
+yawn = []
 num_rows = 0
 
+data = [x y z roll pitch yawn]
+
+# read data from .csv file
 with open(sys.argv[1],'r') as csvfile:
 	plots = csv.reader(csvfile, delimiter=',')
 	for row in plots:
