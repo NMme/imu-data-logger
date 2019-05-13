@@ -12,59 +12,112 @@ pitch = []
 yawn = []
 num_rows = 0
 
-data = [x y z roll pitch yawn]
+#data = [x y z roll pitch yawn]
 
 # read data from .csv file
 with open(sys.argv[1],'r') as csvfile:
 	plots = csv.reader(csvfile, delimiter=',')
 	for row in plots:
-		if row[0] != 'nan':
-			x.append(float(row[0]))
+            print row
+	    if row[0] != 'nan':
+	    	x.append(float(row[0]))
+	    if row[1] != 'nan':
+	    	y.append(float(row[1]))
+	    if row[2] != 'nan':
+    		z.append(float(row[1]))
+	    if row[3] != 'nan':
+	    	roll.append(float(row[1]))
+	    if row[4] != 'nan':
+	    	pitch.append(float(row[1]))
+	    if row[5] != 'nan':
+	    	yawn.append(float(row[1]))
 
-		if row[1] != 'nan':
-			z.append(float(row[1]))
+            num_rows = num_rows + 1
 
-                num_rows = num_rows + 1
-
-
-#x = list(range(0, len(y))
-
-#Do signal analyzing here
-df = num_rows/2
-fft_x = np.fft.fft(x)
-fx, Pxx_den = signal.welch(x, df, nperseg=256)
-#fx, t, Zxx = signal.stft(x, 1000, nperseg=200)
-
-fft_z = np.fft.fft(z)
-fz, Pzz_den = signal.welch(z, df, nperseg=256)
 
 print("Accel_x mean: ", np.mean(x))
 print("Accel_x var: ", np.var(x))
 
-#create the plot
-plt.figure(1, figsize=(18,10))
+# Some constants from measurements
+fs = 1000 # sample rate
+ns = num_rows
+T_beo = fs * ns # Beobachtungsdauer
+f_res = float(fs)/ns
+
+# Analyze x-accelaration
+rfft_x = np.fft.rfft(x)
+rfft_x = abs(rfft_x)/(len(rfft_x)/2)
+fx_axis = f_res*np.arange(0,len(rfft_x))
+fx_lds, Pxx_den = signal.periodogram(x, fs)
+
+# Analyze y-accelaration
+rfft_y = np.fft.rfft(y)
+rfft_y = abs(rfft_y)/(len(rfft_y)/2)
+fy_axis = f_res*np.arange(0,len(rfft_y))
+fy_lds, Pyy_den = signal.periodogram(y, fs)
+
+# Analyze z-accelaration
+rfft_z = np.fft.rfft(z)
+rfft_z = abs(rfft_z)/(len(rfft_z)/2)
+fz_axis = f_res*np.arange(0,len(rfft_z))
+fz_lds, Pzz_den = signal.periodogram(z, fs)
+
+#create plot x-accelaration
+plt.figure(1)
 plt.subplot(311)
 plt.title('IMU Values')
 plt.plot(x) 
-#plt.plot(y)
-plt.plot(z)
 plt.xlabel('time')
 plt.ylabel('Accel')
-#plt.subplot(312)
-#plt.plot(fft_x)
-#plt.plot(fft_y)
-#plt.plot(fft_z)
-#plt.title('FFT')
-#plt.xlabel('freq')
-#plt.ylabel('A')
 plt.subplot(312)
-#plt.pcolormesh(t, fx, np.abs(Zxx), vmin=0, vmax=3.5)
-#plt.plot(fx, Pxx_den)
-#plt.plot(fy, Pyy_den)
-plt.plot(fz, Pzz_den)
+plt.title('FFT')
+plt.plot(fx_axis, rfft_x)
+plt.xlabel('frequency')
+plt.ylabel('A')
+plt.subplot(313)
+plt.plot(fx_lds, Pxx_den)
 plt.title('spectral density')
 plt.xlabel('freq')
 plt.ylabel('PSD')
-plt.legend()
-plt.show()
+plt.tight_layout()
+#plt.show()
 
+#create plot y-accelaration
+plt.figure(2)
+plt.subplot(311)
+plt.title('IMU Values')
+plt.plot(y) 
+plt.xlabel('time')
+plt.ylabel('Accel')
+plt.subplot(312)
+plt.title('FFT')
+plt.plot(fy_axis, rfft_y)
+plt.xlabel('frequency')
+plt.ylabel('A')
+plt.subplot(313)
+plt.plot(fy_lds, Pyy_den)
+plt.title('spectral density')
+plt.xlabel('freq')
+plt.ylabel('PSD')
+plt.tight_layout()
+#plt.show()
+
+#create plot z-accelaration
+plt.figure(3)
+plt.subplot(311)
+plt.title('IMU Values')
+plt.plot(z) 
+plt.xlabel('time')
+plt.ylabel('Accel')
+plt.subplot(312)
+plt.title('FFT')
+plt.plot(fz_axis, rfft_z)
+plt.xlabel('frequency')
+plt.ylabel('A')
+plt.subplot(313)
+plt.plot(fz_lds, Pzz_den)
+plt.title('spectral density')
+plt.xlabel('freq')
+plt.ylabel('PSD')
+plt.tight_layout()
+plt.show()
