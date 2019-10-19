@@ -10,6 +10,7 @@ z = []
 roll = []
 pitch = []
 yawn = []
+time_vector = []
 num_rows = 0
 
 #data = [x y z roll pitch yawn]
@@ -20,26 +21,38 @@ with open(sys.argv[1],'r') as csvfile:
 	for row in plots:
             print row
 	    if row[0] != 'nan':
-	    	x.append(float(row[0]))
+	    	time_vector.append(int(float(row[0])))
 	    if row[1] != 'nan':
-	    	y.append(float(row[1]))
+	    	x.append(float(row[1]))
 	    if row[2] != 'nan':
-    		z.append(float(row[1]))
+	    	y.append(float(row[2]))
 	    if row[3] != 'nan':
-	    	roll.append(float(row[1]))
+    		z.append(float(row[3]))
 	    if row[4] != 'nan':
-	    	pitch.append(float(row[1]))
+	    	roll.append(float(row[4]))
 	    if row[5] != 'nan':
-	    	yawn.append(float(row[1]))
+	    	pitch.append(float(row[5]))
+	    if row[6] != 'nan':
+	    	yawn.append(float(row[6]))
 
             num_rows = num_rows + 1
 
 
 print("Accel_x mean: ", np.mean(x))
 print("Accel_x var: ", np.var(x))
+print("Accel_y mean: ", np.mean(y))
+print("Accel_y var: ", np.var(y))
+print("Accel_z mean: ", np.mean(z))
+print("Accel_z var: ", np.var(z))
 
 # Some constants from measurements
-fs = 1000 # sample rate
+fs_o = 952# sample rate
+fs = 952 
+if fs_o != fs:
+    s_down = fs_o/fs
+    del x[::s_down]
+    del y[::s_down]
+    del z[::s_down]
 ns = num_rows
 T_beo = fs * ns # Beobachtungsdauer
 f_res = float(fs)/ns
@@ -65,7 +78,7 @@ fz_lds, Pzz_den = signal.periodogram(z, fs)
 #create plot x-accelaration
 plt.figure(1)
 plt.subplot(311)
-plt.title('IMU Values')
+plt.title('IMU Values X')
 plt.plot(x) 
 plt.xlabel('time')
 plt.ylabel('Accel')
@@ -85,7 +98,7 @@ plt.tight_layout()
 #create plot y-accelaration
 plt.figure(2)
 plt.subplot(311)
-plt.title('IMU Values')
+plt.title('IMU Values Y')
 plt.plot(y) 
 plt.xlabel('time')
 plt.ylabel('Accel')
@@ -105,7 +118,7 @@ plt.tight_layout()
 #create plot z-accelaration
 plt.figure(3)
 plt.subplot(311)
-plt.title('IMU Values')
+plt.title('IMU Values Z')
 plt.plot(z) 
 plt.xlabel('time')
 plt.ylabel('Accel')
